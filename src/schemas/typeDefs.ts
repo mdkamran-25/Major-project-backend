@@ -171,7 +171,100 @@ export const typeDefs = gql`
     isActive: Boolean!
     createdAt: DateTime!
   }
+  # ========== NOTIFICATION TYPES ==========
+  enum NotificationType {
+    EMAIL
+    SMS
+    PUSH
+    IN_APP
+    WEBHOOK
+  }
 
+  enum NotificationStatus {
+    PENDING
+    SENT
+    DELIVERED
+    FAILED
+    BOUNCED
+  }
+
+  type Notification {
+    id: String!
+    type: NotificationType!
+    recipient: String!
+    subject: String
+    message: String!
+    status: NotificationStatus!
+    sentAt: DateTime
+    deliveredAt: DateTime
+    failureReason: String
+    retryCount: Int!
+    createdAt: DateTime!
+  }
+
+  # ========== SYSTEM HEALTH TYPES ==========
+  enum ComponentStatusEnum {
+    HEALTHY
+    DEGRADED
+    UNHEALTHY
+    UNKNOWN
+  }
+
+  type ComponentHealth {
+    name: String!
+    status: ComponentStatusEnum!
+    responseTime: Int!
+    errorRate: Float!
+    lastCheck: DateTime!
+    details: JSON
+    errorMessage: String
+  }
+
+  type SystemHealth {
+    id: String!
+    overallStatus: ComponentStatusEnum!
+    uptime: Float!
+    components: [ComponentHealth!]!
+    metrics: JSON!
+    lastCheck: DateTime!
+  }
+
+  # ========== AUDIT LOG TYPES ==========
+  type AuditLog {
+    id: String!
+    userId: String!
+    action: String!
+    resource: String!
+    resourceId: String
+    changes: JSON
+    ipAddress: String
+    createdAt: DateTime!
+  }
+
+  # ========== ADMIN STATS ==========
+  type AdminStats {
+    totalUsers: Int!
+    activeUsers: Int!
+    totalAlerts: Int!
+    activeAlerts: Int!
+    totalStations: Int!
+    activeStations: Int!
+    totalNotifications: Int!
+    recentIngestionLogs: [DataIngestionLog!]!
+  }
+
+  type DataIngestionLog {
+    id: String!
+    source: String!
+    status: String!
+    recordsProcessed: Int!
+    recordsFailed: Int!
+    errorMessage: String
+    startTime: DateTime!
+    endTime: DateTime!
+    duration: Int!
+    createdAt: DateTime!
+  }
   # ========== PAGINATION TYPES ==========
   type PageInfo {
     hasNextPage: Boolean!
@@ -199,6 +292,17 @@ export const typeDefs = gql`
     satelliteData(filter: SatelliteDataFilterInput, pagination: PaginationInput): [SatelliteData!]!
     latestSatelliteData(region: String): SatelliteData
     satelliteImage(id: String!): SatelliteData
+
+    # Notification queries
+    notifications(pagination: PaginationInput): [Notification!]!
+
+    # System health queries
+    systemHealth: SystemHealth
+
+    # Admin queries (ADMIN role only)
+    users(pagination: PaginationInput): [User!]!
+    adminStats: AdminStats!
+    auditLogs(pagination: PaginationInput): [AuditLog!]!
   }
 
   # ========== MUTATION TYPES ==========
@@ -209,9 +313,25 @@ export const typeDefs = gql`
     refreshToken(refreshToken: String!): AuthToken!
     logout: Boolean!
 
+    # Profile management
+    updateProfile(name: String, avatar: String): User!
+    updatePreferences(
+      alertTypes: [String!]
+      regions: [String!]
+      emailNotifications: Boolean
+      smsNotifications: Boolean
+      pushNotifications: Boolean
+      theme: String
+      language: String
+    ): UserPreferences!
+
     # Alert management
     acknowledgeAlert(alertId: String!): Alert!
     resolveAlert(alertId: String!): Alert!
+
+    # Admin mutations (ADMIN role only)
+    updateUserRole(userId: String!, role: UserRole!): User!
+    toggleUserActive(userId: String!): User!
   }
 
   # ========== SUBSCRIPTION TYPES ==========

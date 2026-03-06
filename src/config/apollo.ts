@@ -14,6 +14,8 @@ import { alertResolvers } from '@resolvers/alert.js';
 import { gpsResolvers } from '@resolvers/gps.js';
 import { satelliteResolvers } from '@resolvers/satellite.js';
 import { authResolvers } from '@resolvers/auth.js';
+import { systemResolvers } from '@resolvers/system.js';
+import { adminResolvers } from '@resolvers/admin.js';
 import { createContext } from '../types/context.js';
 import type { ApolloContext } from '../types/context.js';
 import { verifyToken } from '@utils/jwt.js';
@@ -27,10 +29,13 @@ const resolvers = {
     ...alertResolvers.Query,
     ...gpsResolvers.Query,
     ...satelliteResolvers.Query,
+    ...systemResolvers.Query,
+    ...adminResolvers.Query,
   },
   Mutation: {
     ...authResolvers.Mutation,
     ...alertResolvers.Mutation,
+    ...adminResolvers.Mutation,
   },
   Subscription: {
     ...alertResolvers.Subscription,

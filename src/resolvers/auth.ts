@@ -233,5 +233,63 @@ export const authResolvers = {
         throw new Error('Logout failed');
       }
     },
+
+    async updateProfile(_: any, args: { name?: string; avatar?: string }, context: ApolloContext) {
+      if (!context.isAuthenticated || !context.user) {
+        throw new Error('Authentication required');
+      }
+
+      const data: any = {};
+      if (args.name !== undefined) data.displayName = args.name;
+      if (args.avatar !== undefined) data.photoURL = args.avatar;
+
+      const user = await prisma.user.update({
+        where: { id: context.user.userId },
+        data,
+        include: { preferences: true },
+      });
+
+      log.info({ userId: context.user.userId }, 'Profile updated');
+      return user;
+    },
+
+    async updatePreferences(
+      _: any,
+      args: {
+        alertTypes?: string[];
+        regions?: string[];
+        emailNotifications?: boolean;
+        smsNotifications?: boolean;
+        pushNotifications?: boolean;
+        theme?: string;
+        language?: string;
+      },
+      context: ApolloContext,
+    ) {
+      if (!context.isAuthenticated || !context.user) {
+        throw new Error('Authentication required');
+      }
+
+      const data: any = {};
+      if (args.alertTypes !== undefined) data.alertTypes = args.alertTypes;
+      if (args.regions !== undefined) data.monitoredRegions = args.regions;
+      if (args.emailNotifications !== undefined) data.emailNotifications = args.emailNotifications;
+      if (args.smsNotifications !== undefined) data.smsNotifications = args.smsNotifications;
+      if (args.pushNotifications !== undefined) data.pushNotifications = args.pushNotifications;
+      if (args.theme !== undefined) data.theme = args.theme;
+      if (args.language !== undefined) data.language = args.language;
+
+      const prefs = await prisma.userPreferences.upsert({
+        where: { userId: context.user.userId },
+        update: data,
+        create: {
+          userId: context.user.userId,
+          ...data,
+        },
+      });
+
+      log.info({ userId: context.user.userId }, 'Preferences updated');
+      return prefs;
+    },
   },
 };
