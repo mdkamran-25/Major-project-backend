@@ -73,7 +73,7 @@ async function verifySupabaseConnection() {
   try {
     // Test 3: Environment Variables
     console.log('3️⃣  Checking environment configuration...');
-    const requiredVars = ['DATABASE_URL', 'JWT_SECRET', 'FIREBASE_PROJECT_ID'];
+    const requiredVars = ['DATABASE_URL', 'JWT_SECRET'];
     const missingVars = requiredVars.filter((v) => !process.env[v]);
 
     if (missingVars.length === 0) {
@@ -165,9 +165,7 @@ async function verifySupabaseConnection() {
   });
 
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log(
-    `Results: ${successCount} ✅ | ${warningCount} ⚠️  | ${errorCount} ❌`,
-  );
+  console.log(`Results: ${successCount} ✅ | ${warningCount} ⚠️  | ${errorCount} ❌`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
   if (errorCount === 0) {

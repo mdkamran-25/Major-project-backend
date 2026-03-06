@@ -87,7 +87,7 @@ npm run test            # Run Jest tests
 ```
 src/
 ├── config/             # Apollo Server & Express config
-├── lib/                # Database, Redis, Firebase clients
+├── lib/                # Database, Prisma clients
 ├── resolvers/          # GraphQL resolvers (Query, Mutation)
 ├── schemas/            # GraphQL type definitions
 ├── services/           # Business logic (GPS, Satellite, Detection)
@@ -106,17 +106,16 @@ scripts/
 
 ## 🔐 Authentication
 
-- **Firebase Auth** for user sign-up/sign-in
 - **JWT tokens** for API requests (Bearer token in Authorization header)
+- **bcrypt** password hashing for signup/login
 - **Role-based access control** (ADMIN, OPERATOR, VIEWER)
 
 ### Getting a Token
 
-1. Authenticate via Firebase (frontend handles this)
-2. Exchange Firebase ID token for JWT:
+1. Sign up or log in via GraphQL mutations:
    ```graphql
    mutation {
-     googleAuth(idToken: "firebase-id-token") {
+     login(email: "user@example.com", password: "password") {
        token
        refreshToken
        expiresIn
@@ -128,7 +127,7 @@ scripts/
      }
    }
    ```
-3. Use token in subsequent requests:
+2. Use token in subsequent requests:
    ```
    Authorization: Bearer <jwt-token>
    ```
@@ -175,7 +174,7 @@ scripts/
 
 ### Core Entities
 
-- **User** - User accounts with Firebase auth integration
+- **User** - User accounts with JWT auth
 - **GPSStation** - GPS monitoring station metadata
 - **GPSReading** - Time-series GPS displacement data (hypertable)
 - **SatelliteData** - Satellite imagery with anomaly scores (hypertable)
@@ -253,7 +252,6 @@ query {
 
 - SendGrid (Email)
 - Twilio (SMS)
-- Firebase Cloud Messaging (Push)
 
 ## 📈 Performance Features
 
@@ -311,10 +309,6 @@ DATABASE_URL=postgresql://user:password@localhost:5432/tsunami_alert
 
 # Redis
 REDIS_URL=redis://localhost:6379
-
-# Firebase
-FIREBASE_PROJECT_ID=tsunamimvp-99bf1
-FIREBASE_PRIVATE_KEY=...
 
 # JWT
 JWT_SECRET=your-secret-key
