@@ -1,0 +1,21 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "services": {
+    "backend": {
+      "source": {
+        "type": "github"
+      },
+      "variables": {
+        "RAILWAY_ENVIRONMENT_NAME": "production"
+      }
+    },
+    "db": {
+      "image": "postgres:16-alpine",
+      "variables": {
+        "POSTGRES_USER": "tsunami_user",
+        "POSTGRES_DB": "tsunami_db",
+        "POSTGRES_INITDB_ARGS": "-c max_connections=100 -c shared_buffers=256MB"
+      }
+    }
+  }
+}

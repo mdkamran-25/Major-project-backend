@@ -1,18 +1,27 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Seeding database...');
 
+  // Hash password for admin user
+  const hashedPassword = await bcrypt.hash('admin123', 10);
+
   // Create demo user
   const user = await prisma.user.upsert({
     where: { email: 'admin@tsunami.local' },
-    update: {},
+    update: {
+      password: hashedPassword,
+      isActive: true,
+    },
     create: {
       email: 'admin@tsunami.local',
       displayName: 'Admin User',
+      password: hashedPassword,
       role: 'ADMIN',
+      isActive: true,
       preferences: {
         create: {
           alertTypes: ['WATCH', 'WARNING', 'ALERT'],

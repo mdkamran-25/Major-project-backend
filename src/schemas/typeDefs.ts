@@ -91,6 +91,12 @@ export const typeDefs = gql`
     user: User!
   }
 
+  type ResetPasswordResponse {
+    success: Boolean!
+    message: String!
+    user: User!
+  }
+
   # ========== GPS TYPES ==========
   type GPSStation {
     id: String!
@@ -312,6 +318,7 @@ export const typeDefs = gql`
     login(email: String!, password: String!): AuthToken!
     refreshToken(refreshToken: String!): AuthToken!
     logout: Boolean!
+    resetPassword(email: String!, newPassword: String!): ResetPasswordResponse!
 
     # Profile management
     updateProfile(name: String, avatar: String): User!

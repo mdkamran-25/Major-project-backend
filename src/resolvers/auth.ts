@@ -291,5 +291,55 @@ export const authResolvers = {
       log.info({ userId: context.user.userId }, 'Preferences updated');
       return prefs;
     },
+
+    async resetPassword(
+      _: any,
+      args: { email: string; newPassword: string },
+      context: ApolloContext,
+    ) {
+      try {
+        if (args.newPassword.length < 6) {
+          throw new Error('Password must be at least 6 characters long');
+        }
+
+        // Find user by email
+        const user = await prisma.user.findUnique({
+          where: { email: args.email },
+        });
+
+        if (!user) {
+          throw new Error('User with this email not found');
+        }
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(args.newPassword, 10);
+
+        // Update password and ensure account is active
+        const updatedUser = await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            password: hashedPassword,
+            isActive: true, // Ensure account is active
+          },
+          include: { preferences: true },
+        });
+
+        // Revoke all refresh tokens (force re-login)
+        await prisma.refreshToken.deleteMany({
+          where: { userId: user.id },
+        });
+
+        log.info(`Password reset for user: ${user.email}`);
+
+        return {
+          success: true,
+          message: 'Password has been reset successfully. Please login with your new password.',
+          user: updatedUser,
+        };
+      } catch (error) {
+        log.error(error, 'Password reset failed');
+        throw new Error(error instanceof Error ? error.message : 'Password reset failed');
+      }
+    },
   },
 };
