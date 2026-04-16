@@ -35,8 +35,9 @@ COPY prisma ./prisma
 # Install production dependencies only
 RUN npm install --omit=dev
 
-# Re-generate Prisma client against production node_modules
+# Generate Prisma client with explicit engine path
 RUN npx prisma generate
+RUN ls -la node_modules/.prisma/client/ || echo "Prisma client not found"
 
 # Copy compiled JS and startup script
 COPY --from=builder /app/dist ./dist
